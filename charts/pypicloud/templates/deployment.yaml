@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.fullname" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "app.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "app.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: nginx
+          image: 304160530156.dkr.ecr.us-east-1.amazonaws.com/nginx:1.18.0
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: {{ .Values.appConfig.probe.initialDelay }}
+            periodSeconds: {{ .Values.appConfig.probe.interval }}
+            timeoutSeconds: {{ .Values.appConfig.probe.timeout }}
+            failureThreshold: {{ .Values.appConfig.probe.failureThreshold }}
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ include "app.containerImage" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - uwsgi
+            - --ini-paste-logged
+            - /etc/pypicloud/server.ini
+          ports:
+            - containerPort: {{ .Values.appConfig.containerPort }}
+              protocol: TCP
+          volumeMounts:
+            - name: conf-vol
+              mountPath: /etc/pypicloud/
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.appConfig.containerPort }}
+            initialDelaySeconds: {{ .Values.appConfig.probe.initialDelay }}
+            periodSeconds: {{ .Values.appConfig.probe.interval }}
+            timeoutSeconds: {{ .Values.appConfig.probe.timeout }}
+            failureThreshold: {{ .Values.appConfig.probe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: conf-vol
+          configMap:
+            name: {{ include "app.fullname" . }}-configmap
+        - name: nginx-conf
+          configMap:
+            name: {{ include "app.fullname" . }}-nginx-configmap
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

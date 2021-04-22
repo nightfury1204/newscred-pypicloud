@@ -1,0 +1,31 @@
+apiVersion: v2
+name: pypicloud
+description: PyPi Cloud Helm Chart for Kubernetes
+
+# A chart can be either an 'application' or a 'library' chart.
+#
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+#
+# Library charts provide useful utilities or functions for the chart developer. They're included as
+# a dependency of application charts to inject those utilities and functions into the rendering
+# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.1.1
+
+# Since we manage which version of app should be deployed through CD,
+# so this app version has no significance in here
+appVersion: latest
+
+keywords:
+- pypicloud
+home: https://github.com/newscred/configuration-management
+sources:
+- https://github.com/newscred/configuration-management/kubernetes/charts/pypicloud
+maintainers:
+- name: newscred
+kubeVersion: ">=1.17.0-0"

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "app.fullname" . }}-configmap
+data:
+  server.ini: |
+{{ tpl (.Files.Get "pypicloud.tpl.ini") . | indent 4 }}
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "app.fullname" . }}-nginx-configmap
+data:
+  nginx.conf: |
+{{ tpl (.Files.Get "nginx.tpl.conf") . | indent 4 }}
