@@ -23,9 +23,9 @@ appVersion: latest
 
 keywords:
 - pypicloud
-home: https://github.com/newscred/configuration-management
+home: https://github.com/newscred/newscred-pypicloud
 sources:
-- https://github.com/newscred/configuration-management/kubernetes/charts/pypicloud
+- https://github.com/newscred/newscred-pypicloud/charts/pypicloud
 maintainers:
 - name: newscred
 kubeVersion: ">=1.17.0-0"

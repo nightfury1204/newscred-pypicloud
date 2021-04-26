@@ -47,6 +47,8 @@ spec:
             periodSeconds: {{ .Values.appConfig.probe.interval }}
             timeoutSeconds: {{ .Values.appConfig.probe.timeout }}
             failureThreshold: {{ .Values.appConfig.probe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.nginx.resources | nindent 12 }}
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
